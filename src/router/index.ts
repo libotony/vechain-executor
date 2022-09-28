@@ -4,17 +4,28 @@ import VueRouter from "vue-router"
 Vue.use(VueRouter)
 export const routes = [
   {
-    path: "/Hello",
-    component: ()=> import ('../views/Hello.vue'),
+    name: 'home',
+    path: "/",
+    component: ()=> import ('../views/Overview.vue'),
   },
   {
-    path: "/Todo",
-    component: ()=> import('../views/Todo.vue'),
+    name: 'approve',
+    path: "/approve",
+    component: ()=> import('../views/Approve.vue'),
+  },
+  {
+    name: 'propose',
+    path: "/propose",
+    component: ()=> import('../views/Propose.vue'),
+  },
+  {
+    name: 'history',
+    path: "/history",
+    component: ()=> import('../views/History.vue'),
   },
 ]
 
 const router = new VueRouter({
-  mode: "history",
   routes: routes,
 })
 export default router

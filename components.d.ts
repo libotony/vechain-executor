@@ -8,9 +8,18 @@ export {}
 declare module '@vue/runtime-core' {
   export interface GlobalComponents {
     App: typeof import('./src/App.vue')['default']
-    Hello: typeof import('./src/views/Hello.vue')['default']
+    Approve: typeof import('./src/views/Approve.vue')['default']
+    BCollapse: typeof import('bootstrap-vue')['BCollapse']
+    BContainer: typeof import('bootstrap-vue')['BContainer']
+    BNavbar: typeof import('bootstrap-vue')['BNavbar']
+    BNavbarBrand: typeof import('bootstrap-vue')['BNavbarBrand']
+    BNavbarNav: typeof import('bootstrap-vue')['BNavbarNav']
+    BNavbarToggle: typeof import('bootstrap-vue')['BNavbarToggle']
+    BNavItem: typeof import('bootstrap-vue')['BNavItem']
+    History: typeof import('./src/views/History.vue')['default']
+    Overview: typeof import('./src/views/Overview.vue')['default']
+    Propose: typeof import('./src/views/Propose.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
-    Todo: typeof import('./src/views/Todo.vue')['default']
   }
 }
