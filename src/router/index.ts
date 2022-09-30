@@ -14,11 +14,6 @@ export const routes = [
     component: ()=> import('../views/Approve.vue'),
   },
   {
-    name: 'propose',
-    path: "/propose",
-    component: ()=> import('../views/Propose.vue'),
-  },
-  {
     name: 'history',
     path: "/history",
     component: ()=> import('../views/History.vue'),
