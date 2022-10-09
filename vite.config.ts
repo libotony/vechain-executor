@@ -12,7 +12,7 @@ export default {
             dts: true,
             deep: true,
             resolvers: [
-                BootstrapVueResolver()
+                BootstrapVueResolver({ directives: true })
             ]
         }),
         nodePolyfills()

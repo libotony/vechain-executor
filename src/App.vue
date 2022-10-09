@@ -1,8 +1,8 @@
 <template>
   <div id="app">
-    <b-navbar type="info" variant="light" toggleable="md">
+    <b-navbar type="light" variant="light" toggleable="md">
       <b-container>
-        <b-navbar-brand to="/">Executor</b-navbar-brand>
+        <b-navbar-brand variant="success" to="/">Executor</b-navbar-brand>
         <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
         <b-collapse id="nav-collapse" is-nav>
           <b-navbar-nav>
