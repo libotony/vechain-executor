@@ -8,13 +8,14 @@ export {}
 declare module '@vue/runtime-core' {
   export interface GlobalComponents {
     App: typeof import('./src/App.vue')['default']
-    Approve: typeof import('./src/views/Approve.vue')['default']
     BButton: typeof import('bootstrap-vue')['BButton']
     BCard: typeof import('bootstrap-vue')['BCard']
     BCol: typeof import('bootstrap-vue')['BCol']
     BCollapse: typeof import('bootstrap-vue')['BCollapse']
     BContainer: typeof import('bootstrap-vue')['BContainer']
     BForm: typeof import('bootstrap-vue')['BForm']
+    BFormCheckbox: typeof import('bootstrap-vue')['BFormCheckbox']
+    BFormCheckboxGroup: typeof import('bootstrap-vue')['BFormCheckboxGroup']
     BFormGroup: typeof import('bootstrap-vue')['BFormGroup']
     BFormInput: typeof import('bootstrap-vue')['BFormInput']
     BIconCircleFill: typeof import('bootstrap-vue')['BIconCircleFill']
@@ -30,6 +31,7 @@ declare module '@vue/runtime-core' {
     BRow: typeof import('bootstrap-vue')['BRow']
     History: typeof import('./src/views/History.vue')['default']
     ListItem: typeof import('./src/components/ListItem.vue')['default']
+    Operations: typeof import('./src/views/Operations.vue')['default']
     Overview: typeof import('./src/views/Overview.vue')['default']
     Propose: typeof import('./src/views/Propose.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
