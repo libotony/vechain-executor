@@ -9,7 +9,8 @@ export const Executor = {
         addApprover: { "constant": false, "inputs": [{ "name": "_approver", "type": "address" }, { "name": "_identity", "type": "bytes32" }], "name": "addApprover", "outputs": [], "payable": false, "stateMutability": "nonpayable", "type": "function" },
         revokeApprover: { "constant": false, "inputs": [{ "name": "_approver", "type": "address" }], "name": "revokeApprover", "outputs": [], "payable": false, "stateMutability": "nonpayable", "type": "function" },
         attachVotingContract: { "constant": false, "inputs": [{ "name": "_contract", "type": "address" }], "name": "attachVotingContract", "outputs": [], "payable": false, "stateMutability": "nonpayable", "type": "function" },
-        detachVotingContract: {"constant":false,"inputs":[{"name":"_contract","type":"address"}],"name":"detachVotingContract","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"}
+        detachVotingContract: { "constant": false, "inputs": [{ "name": "_contract", "type": "address" }], "name": "detachVotingContract", "outputs": [], "payable": false, "stateMutability": "nonpayable", "type": "function" },
+        propose: {"constant":false,"inputs":[{"name":"_target","type":"address"},{"name":"_data","type":"bytes"}],"name":"propose","outputs":[{"name":"","type":"bytes32"}],"payable":false,"stateMutability":"nonpayable","type":"function"}
     },
     events: {
         Approvers: { "anonymous": false, "inputs": [{ "indexed": true, "name": "approver", "type": "address" }, { "indexed": false, "name": "action", "type": "bytes32" }], "name": "Approver", "type": "event" },

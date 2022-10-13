@@ -21,8 +21,6 @@ export const ContractName = (addr: string) => {
 }
 
 export const descMethod = (addr: string, data: string) => {
-    console.log(addr)
-    console.log(data)
     const params = {
         set: new abi.Function(Params.methods.set as abi.Function.Definition)
     }

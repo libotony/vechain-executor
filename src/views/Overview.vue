@@ -59,7 +59,7 @@
                                         </span>
                                     </b-col>
                                     <b-col lg="1" sm="2">
-                                        <b-link>DEL</b-link>
+                                        <b-link @click="revokeMaster(item.master)">DEL</b-link>
                                     </b-col>
                                 </template>
                             </list-item>
@@ -68,20 +68,22 @@
                 </b-overlay>
             </b-container>
         </b-overlay>
+       <tx-modal v-model="showModal" :txid="txReq.txid" :error="txReq.error"></tx-modal>
     </b-container>
 </template>
   
 <script setup lang="ts">
 import { Connex } from '@vechain/connex';
-import { inject, reactive, ref } from 'vue';
+import { inject, ref } from 'vue';
 import { abi } from 'thor-devkit'
 import { AuthUtils, Params } from '../contracts';
 import { Executor } from '../contracts/executor';
+import { Authority } from '../contracts/authority';
 
 const connex = inject<Connex>('$connex')!
 const loading = ref(false)
 
-const paramsData: { [index: string]: string } = reactive({
+const paramsData = ref({
     BaseGasPrice: '-',
     RewardRatio: '-',
     ProposerEndorsement: '-',
@@ -135,13 +137,13 @@ const loadData = async () => {
             decoded = params.get.decode(ret[3].data)
             const v4 = parseInt(decoded['0'])
 
-            paramsData.BaseGasPrice = v1
-            paramsData.RewardRatio = v2
-            paramsData.ProposerEndorsement = v3
+            paramsData.value.BaseGasPrice = v1
+            paramsData.value.RewardRatio = v2
+            paramsData.value.ProposerEndorsement = v3
             if (v4 !== 0) {
-                paramsData.MaxBlockPropers = v4.toString()
+                paramsData.value.MaxBlockPropers = v4.toString()
             } else {
-                paramsData.MaxBlockPropers = '101'
+                paramsData.value.MaxBlockPropers = '101'
             }
         })(),
         (async () => {
@@ -190,6 +192,36 @@ const loadData = async () => {
     ])
 
     loading.value = false
+}
+
+const showModal = ref(false)
+const txReq = ref<{ error: string, txid: string }>({ error: '', txid: '' })
+
+let session = {}
+const revokeMaster = async (addr: string) => {
+    const theSession = session = {}
+
+    txReq.value.error = ''
+    txReq.value.txid = ''
+    if (!showModal.value) {
+        showModal.value = true    
+    }
+    try {
+        const action = connex.thor.account(Authority.address).method(Authority.methods.revoke).asClause(addr)
+        const resp = await connex
+            .thor
+            .account(Executor.address)
+            .method(Executor.methods.propose)
+            .transact(action.to, action.data)
+            .request()
+        if (theSession === session) {
+            txReq.value.txid=resp.txid    
+        }
+    } catch (e) {
+        if (theSession === session) { 
+            txReq.value.error=(e as Error).message
+        }
+    }
 }
 
 loadData().catch()

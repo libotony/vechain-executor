@@ -1,7 +1,7 @@
 <template>
     <b-container class="w-75 mx-auto">
         <b-container class="mt-4 mb-4">
-            <b-card nobody>
+            <b-card>
                 <template #header>
                     <h4>Add Master Node</h4>
                 </template>
@@ -29,17 +29,25 @@
             </b-card>
         </b-container>
         <b-container class="mt-4 mb-4">
-            <b-card nobody>
-                <template #header>
-                    <div class="d-flex justify-content-between">
-                        <h4 class="my-auto">Pending Proposals</h4>
-                        <span>
-                            <b-button variant="primary" @click="loadData">Refresh</b-button>
-                        </span>
-                    </div>
-                </template>
-                <b-container>
+            <b-overlay :show="loading">
+                <b-card no-body>
+                    <template #header>
+                        <div class="d-flex justify-content-between">
+                            <h4 class="my-auto">Pending Proposals</h4>
+                            <span>
+                                <b-button variant="primary" @click="loadData">Refresh</b-button>
+                            </span>
+                        </div>
+                    </template>
                     <b-list-group flush>
+                        <list-item v-show="pendingProposals.length==0">
+                            <template #content>
+                                <div style="min-height: 50px" class="d-flex align-items-center">
+                                    <span v-show="loading">LOADING</span>
+                                    <span v-show="!loading">NO CONTENT</span>
+                                </div>
+                            </template>
+                        </list-item>
                         <list-item v-for="proposal in pendingProposals" :key="proposal.id">
                             <template #content>
                                 <b-col lg="1" class="d-flex align-items-center">
@@ -57,9 +65,22 @@
                                 </b-col>
                             </template>
                         </list-item>
+                        <b-list-group-item v-show="pendingProposals.length">
+                            <b-row class="my-1 d-flex justify-content-end">
+                                <span class="pr-2">
+                                    <b-button variant="info" @click="selectAll">SELECT ALL</b-button>
+                                </span>
+                                <span class="pr-2">
+                                    <b-button variant="primary">Approve</b-button>
+                                </span>
+                                <span class="pr-2">
+                                    <b-button variant="primary">Execute</b-button>
+                                </span>
+                            </b-row>
+                        </b-list-group-item>
                     </b-list-group>
-                </b-container>
-            </b-card>
+                </b-card>
+            </b-overlay>
         </b-container>
     </b-container>
 </template>
@@ -70,88 +91,7 @@ import { computed, inject, ref } from 'vue';
 import { descMethod } from '../contracts';
 import { Executor } from '../contracts/executor';
 
-/*
-Authority.add
-Authority.remove
-Params.set
-Executor.addApprover
-Executor.revokeApprover
-Executor.attachVotingContract
-Executor.detachVotingContract
-*/
-
 const connex = inject<Connex>('$connex')!
-const pendingProposals = ref<{ id: string; time: number; desc: string; selected: boolean }[]>([])
-
-const executor = {
-    Proposal: connex.thor.account(Executor.address).event(Executor.events.Proposal).filter([]).cache([Executor.address]),
-    proposals: new abi.Function(Executor.methods.proposals as abi.Function.Definition)
-}
-
-const loadData = async () => {
-    const ts = Math.floor((new Date().getTime()) / 1000)
-    const now = ts - ts % 10
-
-    let proposed: string[] = []
-    const executed: string[] = []
-
-    let offset = 0
-    const step = 40
-    for (; ;) {
-        const filtered = await executor.Proposal.order('desc').range({
-            unit: 'time',
-            from: now - 300 * 24 * 60 * 60,
-            // from: now - 7 * 24 * 60 * 60, // a week ago
-            to: now + 100,
-        }).apply(offset, step)
-
-        if (!filtered.length) {
-            break
-        }
-
-        for (const ev of filtered) {
-            const id = ev.decoded['proposalID'] as string
-            // TODO: test only
-            // if (ev.decoded['action'] === Executor.actions.proposed && !executed.includes(id)) {
-            if (ev.decoded['action'] === Executor.actions.proposed) {
-                proposed.push(id)
-            } else if (ev.decoded['action'] === Executor.actions.executed) {
-                executed.push(id)
-            }
-        }
-        offset += step
-    }
-
-
-    proposed = proposed.reverse()
-    for (let i = 0; i < proposed.length; i += 10) {
-        const clauses: Connex.VM.Clause[] = []
-        for (let j = i; j < i + 10 && j < proposed.length; j++) {
-            clauses.push({
-                to: Executor.address,
-                value: 0,
-                data: executor.proposals.encode(proposed[j])
-            })
-        }
-        const ret = await connex.thor.explain(clauses).cache([Executor.address]).execute()
-
-        console.log(executor.proposals.decode(ret[0].data))
-        for (const [index, pps] of ret.entries()) {
-            const decoded = executor.proposals.decode(pps.data)
-            // TODO: test only
-            // if (decoded['executed']) {
-            //     continue
-            // }
-            pendingProposals.value.push({
-                id: proposed[index + i],
-                time: decoded['timeProposed'],
-                desc: descMethod(decoded['target'], decoded['data']),
-                selected: false,
-            })
-        }
-    }
-    console.log(pendingProposals)
-}
 
 const master = ref("")
 const endorsor = ref("")
@@ -176,6 +116,86 @@ const isValidMaser = computed(() => {
 const isValidEndorsor = computed(() => {
     return /^0x[0-9a-fA-f]{40}/i.test(endorsor.value)
 })
+
+const pendingProposals = ref<{ id: string; time: number; desc: string; selected: boolean }[]>([])
+const loading = ref(true)
+
+const executor = {
+    Proposal: connex.thor.account(Executor.address).event(Executor.events.Proposal).filter([]).cache([Executor.address]),
+    proposals: new abi.Function(Executor.methods.proposals as abi.Function.Definition)
+}
+
+const selectAll = () => {
+    for (const p of pendingProposals.value) {
+        p.selected = true
+    }
+}
+
+const loadData = async () => {
+    loading.value = true
+    const ts = Math.floor((new Date().getTime()) / 1000)
+    const now = ts - ts % 10
+
+    let proposed: string[] = []
+    const executed: string[] = []
+
+    let offset = 0
+    const step = 40
+    for (; ;) {
+        const filtered = await executor.Proposal.order('desc').range({
+            unit: 'time',
+            from: now - 60 * 24 * 60 * 60,
+            // from: now - 7 * 24 * 60 * 60, // a week ago
+            to: now + 100,
+        }).apply(offset, step)
+
+        if (!filtered.length) {
+            break
+        }
+
+        for (const ev of filtered) {
+            const id = ev.decoded['proposalID'] as string
+            // TODO: test only
+            // if (ev.decoded['action'] === Executor.actions.proposed && !executed.includes(id)) {
+            if (ev.decoded['action'] === Executor.actions.proposed) {
+                proposed.push(id)
+            } else if (ev.decoded['action'] === Executor.actions.executed) {
+                executed.push(id)
+            }
+        }
+        offset += step
+    }
+
+
+    proposed = proposed.reverse()
+    pendingProposals.value = []
+    for (let i = 0; i < proposed.length; i += 10) {
+        const clauses: Connex.VM.Clause[] = []
+        for (let j = i; j < i + 10 && j < proposed.length; j++) {
+            clauses.push({
+                to: Executor.address,
+                value: 0,
+                data: executor.proposals.encode(proposed[j])
+            })
+        }
+        const ret = await connex.thor.explain(clauses).cache([Executor.address]).execute()
+
+        for (const [index, pps] of ret.entries()) {
+            const decoded = executor.proposals.decode(pps.data)
+            // TODO: test only
+            // if (decoded['executed']) {
+            //     continue
+            // }
+            pendingProposals.value.push({
+                id: proposed[index + i],
+                time: decoded['timeProposed'],
+                desc: descMethod(decoded['target'], decoded['data']),
+                selected: false,
+            })
+        }
+    }
+    loading.value = false
+}
 
 loadData().catch()
 console.log(pendingProposals)
