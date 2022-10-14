@@ -6,7 +6,7 @@
                     <h4>Add Master Node</h4>
                 </template>
                 <b-container>
-                    <b-form>
+                    <b-form @submit="addMaster">
                         <b-form-group label-cols="2" label="Master:" label-for="input-1">
                             <b-form-input id="input-1" placeholder="Address of Master" required v-model="master" lazy
                                 :state="isValidMaser">
@@ -22,7 +22,7 @@
                                 v-model="identity" lazy :state="isValidIdentity">
                             </b-form-input>
                         </b-form-group>
-                        <p class="mt-3 text-monospace text-truncate">Encoded: {{hashed}} </p>
+                        <p class="mt-3 text-monospace">Encoded: <span class="text-smaller">{{hashed}}</span> </p>
                         <b-button type="submit" variant="primary">Submit</b-button>
                     </b-form>
                 </b-container>
@@ -53,7 +53,8 @@
                                 <b-col lg="1" class="d-flex align-items-center">
                                     <b-form-checkbox v-model="proposal.selected" inline></b-form-checkbox>
                                 </b-col>
-                                <b-col class="text-monospace text-truncate d-flex align-items-center">
+                                <b-col class="text-monospace text-truncate d-flex align-items-center"
+                                    @click="toggle(proposal.id)">
                                     <span>
                                         {{proposal.desc}}
                                     </span>
@@ -71,10 +72,10 @@
                                     <b-button variant="info" @click="selectAll">SELECT ALL</b-button>
                                 </span>
                                 <span class="pr-2">
-                                    <b-button variant="primary">Approve</b-button>
+                                    <b-button variant="primary" @click="runExecutor(false)">Approve</b-button>
                                 </span>
                                 <span class="pr-2">
-                                    <b-button variant="primary">Execute</b-button>
+                                    <b-button variant="primary" :disabled="disableExecute" @click="runExecutor(true)">Execute</b-button>
                                 </span>
                             </b-row>
                         </b-list-group-item>
@@ -82,6 +83,7 @@
                 </b-card>
             </b-overlay>
         </b-container>
+        <tx-modal v-model="showModal" :txid="txReq.txid" :error="txReq.error"></tx-modal>
     </b-container>
 </template>
 
@@ -92,6 +94,30 @@ import { descMethod } from '../contracts';
 import { Executor } from '../contracts/executor';
 
 const connex = inject<Connex>('$connex')!
+
+const showModal = ref(false)
+const txReq = ref<{ error: string, txid: string }>({ error: '', txid: '' })
+
+let session = {}
+const sendTx = async (signReq: Connex.Vendor.TxSigningService) => {
+    const theSession = session = {}
+
+    txReq.value.error = ''
+    txReq.value.txid = ''
+    if (!showModal.value) {
+        showModal.value = true
+    }
+    try {
+        const resp = await signReq.request()
+        if (theSession === session) {
+            txReq.value.txid = resp.txid
+        }
+    } catch (e) {
+        if (theSession === session) {
+            txReq.value.error = (e as Error).message
+        }
+    }
+}
 
 const master = ref("")
 const endorsor = ref("")
@@ -117,7 +143,11 @@ const isValidEndorsor = computed(() => {
     return /^0x[0-9a-fA-f]{40}/i.test(endorsor.value)
 })
 
-const pendingProposals = ref<{ id: string; time: number; desc: string; selected: boolean }[]>([])
+const addMaster = () => {
+    console.log(master.value, endorsor.value, hashed.value)
+}
+
+const pendingProposals = ref<{ id: string; time: number; desc: string; selected: boolean, executable: boolean }[]>([])
 const loading = ref(true)
 
 const executor = {
@@ -130,6 +160,61 @@ const selectAll = () => {
         p.selected = true
     }
 }
+
+const toggle = (id: string) => {
+    console.log('select ' + id)
+    for (const p of pendingProposals.value) {
+        if (p.id === id) {
+            p.selected = !p.selected
+            break
+        }
+    }
+}
+
+const runExecutor = async (execute: boolean) => {
+    const ids = []
+    for (const p of pendingProposals.value) {
+        if (p.selected) {
+            if (execute) {
+                if (p.executable) {
+                    ids.push(p.id)
+                }
+            } else {
+                ids.push(p.id)
+            }
+        }
+    }
+
+    if (ids.length) {
+        const method = connex.thor.account(Executor.address).method(execute ? Executor.methods.execute : Executor.methods.approve)
+        const msg: Connex.Vendor.TxMessage = []
+
+        for (const id of ids) {
+            msg.push({
+                ...method.asClause(id),
+                abi: execute ? Executor.methods.execute : Executor.methods.approve
+            })
+        }
+
+        await sendTx(
+            connex.vendor.sign('tx', msg)
+        )
+    }
+}
+
+const disableExecute = computed(() => {
+    let hasSelected = false
+    for (const p of pendingProposals.value) {
+        hasSelected = hasSelected || p.selected
+        if (p.selected && !p.executable) {
+            return true
+        }
+    }
+    if (!hasSelected) {
+        return true
+    }
+    return false
+})
 
 const loadData = async () => {
     loading.value = true
@@ -190,6 +275,7 @@ const loadData = async () => {
                 id: proposed[index + i],
                 time: decoded['timeProposed'],
                 desc: descMethod(decoded['target'], decoded['data']),
+                executable: (decoded['approvalCount'] as number) >= (decoded['quorum'] as number),
                 selected: false,
             })
         }
@@ -198,7 +284,6 @@ const loadData = async () => {
 }
 
 loadData().catch()
-console.log(pendingProposals)
 </script>
 <style>
 .text-smaller {

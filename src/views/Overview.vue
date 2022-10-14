@@ -36,7 +36,7 @@
                                 </template>
                             </list-item>
 
-                            <b-list-group-item class="title-with-bgs py-3 px-4">
+                            <b-list-group-item class="title-with-bg py-3 px-4">
                                 <div>
                                     <h4 class="my-auto">Authority</h4>
                                 </div>
@@ -77,7 +77,7 @@ import { Connex } from '@vechain/connex';
 import { inject, ref } from 'vue';
 import { abi } from 'thor-devkit'
 import { AuthUtils, Params } from '../contracts';
-import { Executor } from '../contracts/executor';
+import { Executor, getApprovers } from '../contracts/executor';
 import { Authority } from '../contracts/authority';
 
 const connex = inject<Connex>('$connex')!
@@ -96,10 +96,7 @@ const masternodes = ref<AuthUtils.MasterNode[]>([])
 const params = {
     get: new abi.Function(Params.methods.get as abi.Function.Definition)
 }
-const executor = {
-    Approvers: connex.thor.account(Executor.address).event(Executor.events.Approvers).filter([]).cache([Executor.address]),
-    approvers: new abi.Function(Executor.methods.approvers as abi.Function.Definition)
-}
+
 const loadData = async () => {
     loading.value = true
 
@@ -147,46 +144,9 @@ const loadData = async () => {
             }
         })(),
         (async () => {
-            approvers.value = []
-            let offset = 0
-            const step = 40
-            const revoked = new Set<string>()
-            const addrs: string[] = []
-            for (; ;) {
-                const filtered = await executor.Approvers.apply(offset, step)
-                if (!filtered.length) {
-                    break
-                }
-                for (const ev of filtered) {
-                    if (ev.decoded['action'] === Executor.actions.revoked) {
-                        revoked.add(ev.decoded['approver'])
-                    }
-                    addrs.push(ev.decoded['approver'])
-                }
-
-                offset += step
-            }
-            const inPower = addrs.filter(x => !revoked.has(x))
-            const clauses: Connex.VM.Clause[] = []
-            for (const address of inPower) {
-                clauses.push({
-                    to: Executor.address,
-                    value: 0,
-                    data: executor.approvers.encode(address)
-                })
-            }
-            const ret = await connex.thor.explain(clauses).cache([Executor.address]).execute()
-            for (const [index, address] of inPower.entries()) {
-                const decoded = executor.approvers.decode(ret[index].data)
-                approvers.value.push({
-                    address,
-                    identity: decoded['identity']
-                })
-            }
-
+            approvers.value = await getApprovers(connex)            
         })(),
         (async () => {
-            masternodes.value = []
             masternodes.value = await AuthUtils.ListAll(connex.thor)
         })()
     ])

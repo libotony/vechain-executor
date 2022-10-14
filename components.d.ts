@@ -30,6 +30,7 @@ declare module '@vue/runtime-core' {
     BOverlay: typeof import('bootstrap-vue')['BOverlay']
     BRow: typeof import('bootstrap-vue')['BRow']
     BSpinner: typeof import('bootstrap-vue')['BSpinner']
+    BTable: typeof import('bootstrap-vue')['BTable']
     History: typeof import('./src/views/History.vue')['default']
     ListItem: typeof import('./src/components/ListItem.vue')['default']
     Operations: typeof import('./src/views/Operations.vue')['default']
