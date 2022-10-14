@@ -3,7 +3,7 @@
         <div class="text-center p-1 text-break">
             <div v-if="txid">
                 <span>
-                    Done! <a :href="'https://explore.vechain.org/transactions/'+txid" class="text-monospace"
+                    Done! <a :href="explorer.transaction(txid)" class="text-monospace"
                         target="_blank">{{txid}}</a>
                 </span>
             </div>
@@ -22,6 +22,8 @@
   
 <script setup lang="ts">
 import { computed } from 'vue';
+import { explorer } from '../utils';
+
 const props = defineProps<{
     txid: string;
     error: string;

@@ -29,7 +29,7 @@
                                 <template #content>
                                     <b-col lg="2"><strong>#{{index}}</strong></b-col>
                                     <b-col lg="7">
-                                        <a :href="'https://explore.vechain.org/accounts/'+item.address"
+                                        <a :href="explorer.account(item.address)"
                                             v-b-tooltip.hover :title="'identity '+item.identity"
                                             class="text-monospace text-truncate" target="_blank">{{item.address}}</a>
                                     </b-col>
@@ -45,7 +45,7 @@
                                 <template #content>
                                     <b-col lg="2"><strong>#{{index}}</strong></b-col>
                                     <b-col lg="7"><a class="text-monospace text-truncate"
-                                            :href="'https://explore.vechain.org/accounts/'+item.master"
+                                            :href="explorer.account(item.master)"
                                             :title="'identity: '+item.identity" v-b-tooltip.hover
                                             target="_blank">{{item.master}}</a>
                                     </b-col>
@@ -79,6 +79,7 @@ import { abi } from 'thor-devkit'
 import { AuthUtils, Params } from '../contracts';
 import { Executor, getApprovers } from '../contracts/executor';
 import { Authority } from '../contracts/authority';
+import { explorer } from '../utils';
 
 const connex = inject<Connex>('$connex')!
 const loading = ref(false)
