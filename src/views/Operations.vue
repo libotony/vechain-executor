@@ -50,13 +50,10 @@
                         </list-item>
                         <list-item v-for="proposal in pendingProposals" :key="proposal.id">
                             <template #content>
-                                <b-col lg="1" class="d-flex align-items-center">
-                                    <b-form-checkbox v-model="proposal.selected" inline></b-form-checkbox>
-                                </b-col>
-                                <b-col class="text-monospace text-truncate d-flex align-items-center justify-content-between" @click="toggle(proposal.id)">
-                                    <span>
-                                        {{proposal.desc}}
-                                    </span>
+                                <b-col class="text-monospace text-truncate d-flex align-items-center justify-content-between">
+                                    <div>
+                                        <b-form-checkbox v-model="proposal.selected" inline>{{proposal.desc}}</b-form-checkbox>
+                                    </div>
                                     <span class="text-info">
                                         {{proposal.votes}}
                                     </span>
