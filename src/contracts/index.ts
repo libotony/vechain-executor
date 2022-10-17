@@ -43,7 +43,7 @@ export const descMethod = (addr: string, data: string) => {
             desc += 'Params'
             if (data.slice(0, 10) === params.set.signature) {
                 const decoded = abi.decodeParameters(params.set.definition.inputs, '0x'+data.slice(10))
-                desc += `.set(${Buffer.from(decoded['_key'].slice(2), 'hex').toString().replace(/\x00/g, "")})`
+                desc += `.set(${Buffer.from(decoded['_key'].slice(2), 'hex').toString().replace(/\x00/g, '')})`
             } else {
                 desc += `.${data.slice(0, 10)}`
             }

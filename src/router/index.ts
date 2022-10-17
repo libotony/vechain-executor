@@ -1,26 +1,26 @@
-import Vue from "vue"
-import VueRouter from "vue-router"
+import Vue from 'vue'
+import VueRouter from 'vue-router'
 
 Vue.use(VueRouter)
 export const routes = [
     {
         name: 'home',
-        path: "/",
+        path: '/',
         redirect: '/overview'
     },
     {
         name: 'overview',
-        path: "/overview",
+        path: '/overview',
         component: () => import('../views/Overview.vue'),
     },
     {
         name: 'operations',
-        path: "/operations",
+        path: '/operations',
         component: () => import('../views/Operations.vue'),
     },
     {
         name: 'history',
-        path: "/history",
+        path: '/history',
         component: () => import('../views/History.vue'),
     },
 ]
