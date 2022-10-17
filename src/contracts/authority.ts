@@ -1,4 +1,4 @@
-import { stringToHex } from './utils';
+import { stringToHex } from './utils'
 
 export const Authority = {
     address: stringToHex('Authority', 20),

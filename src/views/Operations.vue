@@ -53,10 +53,12 @@
                                 <b-col lg="1" class="d-flex align-items-center">
                                     <b-form-checkbox v-model="proposal.selected" inline></b-form-checkbox>
                                 </b-col>
-                                <b-col class="text-monospace text-truncate d-flex align-items-center"
-                                    @click="toggle(proposal.id)">
+                                <b-col class="text-monospace text-truncate d-flex align-items-center justify-content-between" @click="toggle(proposal.id)">
                                     <span>
                                         {{proposal.desc}}
+                                    </span>
+                                    <span class="text-info">
+                                        {{proposal.votes}}
                                     </span>
                                 </b-col>
                                 <b-col lg="3" class="d-flex align-items-center">
@@ -88,10 +90,10 @@
 </template>
 
 <script setup lang="ts">
-import { abi, blake2b256 } from 'thor-devkit';
-import { computed, inject, ref } from 'vue';
-import { descMethod } from '../contracts';
-import { Executor } from '../contracts/executor';
+import { abi, blake2b256 } from 'thor-devkit'
+import { computed, inject, ref } from 'vue'
+import { descMethod } from '../contracts'
+import { Executor } from '../contracts/executor'
 
 const connex = inject<Connex>('$connex')!
 
@@ -147,7 +149,7 @@ const addMaster = () => {
     console.log(master.value, endorsor.value, hashed.value)
 }
 
-const pendingProposals = ref<{ id: string; time: number; desc: string; selected: boolean, executable: boolean }[]>([])
+const pendingProposals = ref<{ id: string; time: number; desc: string; selected: boolean, executable: boolean; votes: string }[]>([])
 const loading = ref(true)
 
 const executor = {
@@ -229,7 +231,7 @@ const loadData = async () => {
     for (; ;) {
         const filtered = await executor.Proposal.order('desc').range({
             unit: 'time',
-            from: now - 60 * 24 * 60 * 60,
+            from: now - 300 * 24 * 60 * 60,
             // from: now - 7 * 24 * 60 * 60, // a week ago
             to: now + 100,
         }).apply(offset, step)
@@ -276,6 +278,7 @@ const loadData = async () => {
                 time: decoded['timeProposed'],
                 desc: descMethod(decoded['target'], decoded['data']),
                 executable: (decoded['approvalCount'] as number) >= (decoded['quorum'] as number),
+                votes: `${decoded['approvalCount']}/${decoded['quorum']}`,
                 selected: false,
             })
         }

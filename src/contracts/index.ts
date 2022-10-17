@@ -1,8 +1,10 @@
-import { Executor } from './executor';
+import { Executor } from './executor'
 import { Params } from './params'
 import { Authority } from './authority'
-import { abi } from 'thor-devkit';
-import { abbr } from './utils';
+import { abi } from 'thor-devkit'
+import { abbr } from './utils'
+import {Buffer} from 'buffer'
+
 
 export * from './params'
 export * as AuthUtils from './auth-utils'
@@ -10,7 +12,7 @@ export * as AuthUtils from './auth-utils'
 export const ContractName = (addr: string) => {
     switch (addr.toLowerCase()) {
         case Params.address:
-            return 'Params';
+            return 'Params'
         case Executor.address:
             return 'Executor'
         case Authority.address:

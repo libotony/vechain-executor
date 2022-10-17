@@ -1,6 +1,6 @@
-import { stringToHex } from './utils';
+import { stringToHex } from './utils'
 import { Buffer } from 'buffer'
-import { abi } from 'thor-devkit';
+import { abi } from 'thor-devkit'
 
 export const Executor = {
     address: stringToHex('Executor', 20),

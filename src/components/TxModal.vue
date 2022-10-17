@@ -21,8 +21,8 @@
 </template>
   
 <script setup lang="ts">
-import { computed } from 'vue';
-import { explorer } from '../utils';
+import { computed } from 'vue'
+import { explorer } from '../utils'
 
 const props = defineProps<{
     txid: string;

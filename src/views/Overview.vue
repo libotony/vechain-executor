@@ -73,13 +73,13 @@
 </template>
   
 <script setup lang="ts">
-import { Connex } from '@vechain/connex';
-import { inject, ref } from 'vue';
+import { Connex } from '@vechain/connex'
+import { inject, ref } from 'vue'
 import { abi } from 'thor-devkit'
-import { AuthUtils, Params } from '../contracts';
-import { Executor, getApprovers } from '../contracts/executor';
-import { Authority } from '../contracts/authority';
-import { explorer } from '../utils';
+import { AuthUtils, Params } from '../contracts'
+import { Executor, getApprovers } from '../contracts/executor'
+import { Authority } from '../contracts/authority'
+import { explorer } from '../utils'
 
 const connex = inject<Connex>('$connex')!
 const loading = ref(false)

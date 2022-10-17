@@ -1,4 +1,4 @@
-import { stringToHex } from './utils';
+import { stringToHex } from './utils'
 
 export const Params = {
     address: stringToHex('Params', 20),
