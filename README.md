@@ -1,6 +1,6 @@
 # Executor
 
-A dApp operates [VeChain Executor](https://github.com/vechain/thor/blob/master/builtin/gen/executor.sol), also known as **on-chain governance**. 
+A dApp interacting with [VeChain Executor](https://github.com/vechain/thor/blob/master/builtin/gen/executor.sol), also known as **on-chain governance mechanism**. 
 
 Deployed version: https://libotony.github.io/vechain-executor
 
