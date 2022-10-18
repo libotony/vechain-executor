@@ -7,7 +7,9 @@
                         <div class="d-flex justify-content-between">
                             <h4 class="my-auto">Proposal</h4>
                             <span>
-                                <b-button variant="primary" pill @click="loadData"><b-icon-arrow-clockwise></b-icon-arrow-clockwise></b-button>
+                                <b-button variant="primary" pill @click="loadData">
+                                    <b-icon-arrow-clockwise></b-icon-arrow-clockwise>
+                                </b-button>
                             </span>
                         </div>
                     </template>
@@ -47,7 +49,7 @@
                                         </template>
                                         <b-card-body class="p-0">
                                             <b-table small :items="input.params" responsive
-                                                tbody-tr-class="text-monospace" class="mb-0">
+                                                tbody-tr-class="text-monospace text-smaller" class="mb-0">
                                             </b-table>
                                         </b-card-body>
                                     </b-card>
@@ -115,7 +117,6 @@ const contracts = {
 }
 
 const loadData = async () => {
-    console.log('load')
     const proposalID = route.params.id
 
     if (/^0x[0-9a-fA-f]{40}/i.test(proposalID)) {

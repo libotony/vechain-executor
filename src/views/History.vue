@@ -6,7 +6,9 @@
                     <div class="d-flex justify-content-between">
                         <h4 class="my-auto">History</h4>
                         <span>
-                            <b-button variant="primary" pill @click="loadData"><b-icon-arrow-clockwise></b-icon-arrow-clockwise></b-button>
+                            <b-button variant="primary" pill @click="refresh">
+                                <b-icon-arrow-clockwise></b-icon-arrow-clockwise>
+                            </b-button>
                         </span>
                     </div>
                 </template>
@@ -49,6 +51,7 @@
                             </b-col>
                             <b-col lg="1" class="d-flex align-items-center">
                                 <b-icon-check-circle v-if="proposal.executed" variant="success"></b-icon-check-circle>
+                                <b-icon-hourglass-split v-else-if="isPending(proposal.time)"></b-icon-hourglass-split>
                                 <b-icon-x-circle v-else variant="danger"></b-icon-x-circle>
                             </b-col>
                         </template>
@@ -91,11 +94,17 @@ const proposals = ref<{
 const loading = ref(false)
 const hasMore = ref(true)
 
+let ts = Math.floor(new Date().getTime() / 1000)
+const isPending = (timeProposed: number) => {
+    return ts - timeProposed < 7 * 24 * 60 * 60
+}
+
 const refresh = async () => {
     head = connex.thor.status.head.number
     proposals.value = []
     hasMore.value = true
     pos = 0
+    ts = Math.floor(new Date().getTime() / 1000)
     return loadData()
 }
 

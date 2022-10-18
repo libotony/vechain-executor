@@ -7,15 +7,25 @@
                         <div class="d-flex justify-content-between">
                             <h4 class="my-auto">Overview</h4>
                             <span>
-                                <b-button variant="primary" pill @click="loadData"><b-icon-arrow-clockwise></b-icon-arrow-clockwise></b-button>
+                                <b-button variant="primary" pill @click="loadData">
+                                    <b-icon-arrow-clockwise></b-icon-arrow-clockwise>
+                                </b-button>
                             </span>
                         </div>
                     </template>
                     <b-list-group flush>
                         <list-item v-for="(value, key) in paramsData" :key="key">
                             <template #content>
-                                <b-col lg="4"><strong>{{key}}:</strong></b-col>
-                                <b-col lg="4" class="text-monospace text-truncate">{{value}}</b-col>
+                                <b-col lg="6">
+                                    <b-row>
+                                        <b-col lg="8" offset-lg="4"><strong>{{key}}:</strong></b-col>
+                                    </b-row>
+                                </b-col>
+                                <b-col lg="6">
+                                    <b-row>
+                                        <b-col class="text-monospace text-truncate">{{value}}</b-col>
+                                    </b-row>
+                                </b-col>
                             </template>
                         </list-item>
                         <b-list-group-item class="title-with-bg py-3 px-4">

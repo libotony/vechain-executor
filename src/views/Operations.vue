@@ -35,7 +35,9 @@
                         <div class="d-flex justify-content-between">
                             <h4 class="my-auto">Pending Proposals</h4>
                             <span>
-                                <b-button variant="primary" pill @click="loadData"><b-icon-arrow-clockwise></b-icon-arrow-clockwise></b-button>
+                                <b-button variant="primary" pill @click="loadData">
+                                    <b-icon-arrow-clockwise></b-icon-arrow-clockwise>
+                                </b-button>
                             </span>
                         </div>
                     </template>
@@ -74,7 +76,7 @@
                                     <b-button variant="info" @click="selectAll">SELECT ALL</b-button>
                                 </span>
                                 <span class="pr-2">
-                                    <b-button variant="primary" @click="runExecutor(false)">Approve</b-button>
+                                    <b-button variant="primary" :disabled="!enableApprove" @click="runExecutor(false)">Approve</b-button>
                                 </span>
                                 <span class="pr-2">
                                     <b-button variant="primary" :disabled="disableExecute" @click="runExecutor(true)">
@@ -93,7 +95,7 @@
 <script setup lang="ts">
 import { abi, blake2b256 } from 'thor-devkit'
 import { computed, inject, ref } from 'vue'
-import { Executor, descMethod } from '../contracts'
+import { Executor, descMethod, Authority } from '../contracts'
 
 const connex = inject<Connex>('$connex')!
 
@@ -145,8 +147,14 @@ const isValidEndorsor = computed(() => {
     return /^0x[0-9a-fA-f]{40}/i.test(endorsor.value)
 })
 
-const addMaster = () => {
-    console.log(master.value, endorsor.value, hashed.value)
+const addMaster = async () => {
+    const action = connex.thor.account(Authority.address).method(Authority.methods.add).asClause(master.value, endorsor.value, hashed.value)
+    await sendTx(
+        connex.thor
+            .account(Executor.address)
+            .method(Executor.methods.propose)
+            .transact(action.to, action.data)
+    )
 }
 
 const pendingProposals = ref<{ id: string; time: number; desc: string; selected: boolean, executable: boolean; votes: string }[]>([])
@@ -194,6 +202,15 @@ const runExecutor = async (execute: boolean) => {
     }
 }
 
+const enableApprove = computed(() => {
+    for (const p of pendingProposals.value) {
+        if (p.selected) {
+            return true
+        }
+    }
+    return false
+})
+
 const disableExecute = computed(() => {
     let hasSelected = false
     for (const p of pendingProposals.value) {
@@ -225,8 +242,7 @@ const loadData = async () => {
             .order('desc')
             .range({
                 unit: 'time',
-                from: now - 300 * 24 * 60 * 60,
-                // from: now - 7 * 24 * 60 * 60, // a week ago
+                from: now - 7 * 24 * 60 * 60, // a week ago
                 to: now + 100,
             })
             .apply(offset, step)
@@ -237,9 +253,7 @@ const loadData = async () => {
 
         for (const ev of filtered) {
             const id = ev.decoded['proposalID'] as string
-            // TODO: test only
-            // if (ev.decoded['action'] === Executor.actions.proposed && !executed.includes(id)) {
-            if (ev.decoded['action'] === Executor.actions.proposed) {
+            if (ev.decoded['action'] === Executor.actions.proposed && !executed.includes(id)) {
                 proposed.push(id)
             } else if (ev.decoded['action'] === Executor.actions.executed) {
                 executed.push(id)
@@ -264,10 +278,9 @@ const loadData = async () => {
 
         for (const [index, pps] of ret.entries()) {
             const decoded = executor.proposals.decode(pps.data)
-            // TODO: test only
-            // if (decoded['executed']) {
-            //     continue
-            // }
+            if (decoded['executed']) {
+                continue
+            }
             pendingProposals.value.push({
                 id: proposed[index + i],
                 time: parseInt(decoded['timeProposed']),
