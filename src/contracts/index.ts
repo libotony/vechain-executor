@@ -3,11 +3,13 @@ import { Params } from './params'
 import { Authority } from './authority'
 import { abi } from 'thor-devkit'
 import { abbr } from './utils'
-import {Buffer} from 'buffer'
-
+import { Buffer } from 'buffer'
 
 export * from './params'
+export * from './executor'
+export * from './authority'
 export * as AuthUtils from './auth-utils'
+export * from './utils'
 
 export const ContractName = (addr: string) => {
     switch (addr.toLowerCase()) {
@@ -42,7 +44,7 @@ export const descMethod = (addr: string, data: string) => {
         case Params.address:
             desc += 'Params'
             if (data.slice(0, 10) === params.set.signature) {
-                const decoded = abi.decodeParameters(params.set.definition.inputs, '0x'+data.slice(10))
+                const decoded = abi.decodeParameters(params.set.definition.inputs, '0x' + data.slice(10))
                 desc += `.set(${Buffer.from(decoded['_key'].slice(2), 'hex').toString().replace(/\x00/g, '')})`
             } else {
                 desc += `.${data.slice(0, 10)}`
@@ -53,7 +55,7 @@ export const descMethod = (addr: string, data: string) => {
             if (data.slice(0, 10) === authority.add.signature) {
                 const decoded = abi.decodeParameters(authority.add.definition.inputs, '0x' + data.slice(10))
                 desc += `.add(${abbr(decoded['_nodeMaster'])})`
-            } else if (data.slice(0, 10) === authority.revoke.signature) { 
+            } else if (data.slice(0, 10) === authority.revoke.signature) {
                 const decoded = abi.decodeParameters(authority.revoke.definition.inputs, '0x' + data.slice(10))
                 desc += `.revoke(${abbr(decoded['_nodeMaster'])})`
             } else {
@@ -62,19 +64,19 @@ export const descMethod = (addr: string, data: string) => {
             break
         case Executor.address:
             desc += 'Executor'
-            if (data.slice(0, 10) === executor.addApprover.signature) { 
+            if (data.slice(0, 10) === executor.addApprover.signature) {
                 const decoded = abi.decodeParameters(executor.addApprover.definition.inputs, '0x' + data.slice(10))
                 desc += `.addApprover(${abbr(decoded['_approver'])})`
-            } else if (data.slice(0, 10) === executor.revokeApprover.signature) { 
+            } else if (data.slice(0, 10) === executor.revokeApprover.signature) {
                 const decoded = abi.decodeParameters(executor.revokeApprover.definition.inputs, '0x' + data.slice(10))
                 desc += `.revokeApprover(${abbr(decoded['_approver'])})`
-            }  else if (data.slice(0, 10) === executor.attachVotingContract.signature) { 
+            } else if (data.slice(0, 10) === executor.attachVotingContract.signature) {
                 const decoded = abi.decodeParameters(executor.attachVotingContract.definition.inputs, '0x' + data.slice(10))
                 desc += `.attachVotingContract(${abbr(decoded['_approver'])})`
-            }   else if (data.slice(0, 10) === executor.attachVotingContract.signature) { 
+            } else if (data.slice(0, 10) === executor.attachVotingContract.signature) {
                 const decoded = abi.decodeParameters(executor.detachVotingContract.definition.inputs, '0x' + data.slice(10))
                 desc += `.detachVotingContract(${abbr(decoded['_approver'])})`
-            }else {
+            } else {
                 desc += `.${data.slice(0, 10)}`
             }
             break

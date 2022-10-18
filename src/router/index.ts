@@ -22,7 +22,11 @@ export const routes = [
         name: 'history',
         path: '/history',
         component: () => import('../views/History.vue'),
-    },
+    }, {
+        name: 'proposal',
+        path: '/proposal/:id',
+        component: () => import('../views/Proposal.vue')
+    }
 ]
 
 const router = new VueRouter({

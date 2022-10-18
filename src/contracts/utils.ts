@@ -1,8 +1,8 @@
-import {Buffer} from 'buffer'
+import { Buffer } from 'buffer'
 
 /** covert sting to hex, padded from start */
 export const stringToHex = (input: string, bytes = 20) => {
-    return '0x' + Buffer.from(input).toString('hex').padStart(bytes*2, '0')
+    return '0x' + Buffer.from(input).toString('hex').padStart(bytes * 2, '0')
 }
 
 export const abbr = (input: string) => {

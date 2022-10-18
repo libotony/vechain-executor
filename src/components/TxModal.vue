@@ -22,7 +22,7 @@
   
 <script setup lang="ts">
 import { computed } from 'vue'
-import { explorer } from '../utils'
+import { explorer } from '../config'
 
 const props = defineProps<{
     txid: string;

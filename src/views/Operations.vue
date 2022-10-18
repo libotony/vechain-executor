@@ -35,7 +35,7 @@
                         <div class="d-flex justify-content-between">
                             <h4 class="my-auto">Pending Proposals</h4>
                             <span>
-                                <b-button variant="primary" @click="loadData">Refresh</b-button>
+                                <b-button variant="primary" pill @click="loadData"><b-icon-arrow-clockwise></b-icon-arrow-clockwise></b-button>
                             </span>
                         </div>
                     </template>
@@ -50,9 +50,12 @@
                         </list-item>
                         <list-item v-for="proposal in pendingProposals" :key="proposal.id">
                             <template #content>
-                                <b-col class="text-monospace text-truncate d-flex align-items-center justify-content-between">
+                                <b-col
+                                    class="text-monospace text-truncate d-flex align-items-center justify-content-between">
                                     <div>
-                                        <b-form-checkbox v-model="proposal.selected" inline>{{proposal.desc}}</b-form-checkbox>
+                                        <b-form-checkbox v-model="proposal.selected" inline>
+                                            <b-link :to="{name: 'proposal', params: {id: proposal.id}}">{{proposal.desc}}</b-link>
+                                        </b-form-checkbox>
                                     </div>
                                     <span class="text-info">
                                         {{proposal.votes}}
@@ -74,7 +77,8 @@
                                     <b-button variant="primary" @click="runExecutor(false)">Approve</b-button>
                                 </span>
                                 <span class="pr-2">
-                                    <b-button variant="primary" :disabled="disableExecute" @click="runExecutor(true)">Execute</b-button>
+                                    <b-button variant="primary" :disabled="disableExecute" @click="runExecutor(true)">
+                                        Execute</b-button>
                                 </span>
                             </b-row>
                         </b-list-group-item>
@@ -89,8 +93,7 @@
 <script setup lang="ts">
 import { abi, blake2b256 } from 'thor-devkit'
 import { computed, inject, ref } from 'vue'
-import { descMethod } from '../contracts'
-import { Executor } from '../contracts/executor'
+import { Executor, descMethod } from '../contracts'
 
 const connex = inject<Connex>('$connex')!
 
@@ -150,23 +153,13 @@ const pendingProposals = ref<{ id: string; time: number; desc: string; selected:
 const loading = ref(true)
 
 const executor = {
-    Proposal: connex.thor.account(Executor.address).event(Executor.events.Proposal).filter([]).cache([Executor.address]),
+    Proposal: connex.thor.account(Executor.address).event(Executor.events.Proposal).filter([]),
     proposals: new abi.Function(Executor.methods.proposals as abi.Function.Definition)
 }
 
 const selectAll = () => {
     for (const p of pendingProposals.value) {
         p.selected = true
-    }
-}
-
-const toggle = (id: string) => {
-    console.log('select ' + id)
-    for (const p of pendingProposals.value) {
-        if (p.id === id) {
-            p.selected = !p.selected
-            break
-        }
     }
 }
 
@@ -226,12 +219,17 @@ const loadData = async () => {
     let offset = 0
     const step = 40
     for (; ;) {
-        const filtered = await executor.Proposal.order('desc').range({
-            unit: 'time',
-            from: now - 300 * 24 * 60 * 60,
-            // from: now - 7 * 24 * 60 * 60, // a week ago
-            to: now + 100,
-        }).apply(offset, step)
+        const filtered = await executor
+            .Proposal
+            .cache([Executor.address])
+            .order('desc')
+            .range({
+                unit: 'time',
+                from: now - 300 * 24 * 60 * 60,
+                // from: now - 7 * 24 * 60 * 60, // a week ago
+                to: now + 100,
+            })
+            .apply(offset, step)
 
         if (!filtered.length) {
             break
@@ -272,7 +270,7 @@ const loadData = async () => {
             // }
             pendingProposals.value.push({
                 id: proposed[index + i],
-                time: decoded['timeProposed'],
+                time: parseInt(decoded['timeProposed']),
                 desc: descMethod(decoded['target'], decoded['data']),
                 executable: (decoded['approvalCount'] as number) >= (decoded['quorum'] as number),
                 votes: `${decoded['approvalCount']}/${decoded['quorum']}`,

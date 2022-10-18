@@ -1,74 +1,70 @@
 <template>
     <b-container class="w-75 mx-auto">
-        <b-overlay :show="false">
-            <b-container class="mt-4">
-                <b-overlay :show="loading">
-                    <b-card no-body>
-                        <template #header>
-                            <div class="d-flex justify-content-between">
-                                <h4 class="my-auto">Overview</h4>
-                                <span>
-                                    <b-button variant="primary" @click="loadData">Refresh</b-button>
-                                </span>
+        <b-container class="mt-4">
+            <b-overlay :show="loading">
+                <b-card no-body>
+                    <template #header>
+                        <div class="d-flex justify-content-between">
+                            <h4 class="my-auto">Overview</h4>
+                            <span>
+                                <b-button variant="primary" pill @click="loadData"><b-icon-arrow-clockwise></b-icon-arrow-clockwise></b-button>
+                            </span>
+                        </div>
+                    </template>
+                    <b-list-group flush>
+                        <list-item v-for="(value, key) in paramsData" :key="key">
+                            <template #content>
+                                <b-col lg="4"><strong>{{key}}:</strong></b-col>
+                                <b-col lg="4" class="text-monospace text-truncate">{{value}}</b-col>
+                            </template>
+                        </list-item>
+                        <b-list-group-item class="title-with-bg py-3 px-4">
+                            <div>
+                                <h4 class="my-auto">Steering Committee</h4>
                             </div>
-                        </template>
-                        <b-list-group flush>
-                            <list-item v-for="(value, key) in paramsData" :key="key">
-                                <template #content>
-                                    <b-col lg="4"><strong>{{key}}:</strong></b-col>
-                                    <b-col lg="4" class="text-monospace text-truncate">{{value}}</b-col>
-                                </template>
-                            </list-item>
-                            <b-list-group-item class="title-with-bg py-3 px-4">
-                                <div>
-                                    <h4 class="my-auto">Steering Committee</h4>
-                                </div>
-                            </b-list-group-item>
+                        </b-list-group-item>
 
-                            <list-item v-for="(item, index) in approvers" :key="'c'+index">
-                                <template #content>
-                                    <b-col lg="2"><strong>#{{index}}</strong></b-col>
-                                    <b-col lg="7">
-                                        <a :href="explorer.account(item.address)"
-                                            v-b-tooltip.hover :title="'identity '+item.identity"
-                                            class="text-monospace text-truncate" target="_blank">{{item.address}}</a>
-                                    </b-col>
-                                </template>
-                            </list-item>
+                        <list-item v-for="(item, index) in approvers" :key="'c'+index">
+                            <template #content>
+                                <b-col lg="2"><strong>#{{index}}</strong></b-col>
+                                <b-col lg="7">
+                                    <a :href="explorer.account(item.address)" v-b-tooltip.hover
+                                        :title="'identity '+item.identity" class="text-monospace text-truncate"
+                                        target="_blank">{{item.address}}</a>
+                                </b-col>
+                            </template>
+                        </list-item>
 
-                            <b-list-group-item class="title-with-bg py-3 px-4">
-                                <div>
-                                    <h4 class="my-auto">Authority</h4>
-                                </div>
-                            </b-list-group-item>
-                            <list-item v-for="(item, index) in masternodes" :key="index">
-                                <template #content>
-                                    <b-col lg="2"><strong>#{{index}}</strong></b-col>
-                                    <b-col lg="7"><a class="text-monospace text-truncate"
-                                            :href="explorer.account(item.master)"
-                                            :title="'identity: '+item.identity" v-b-tooltip.hover
-                                            target="_blank">{{item.master}}</a>
-                                    </b-col>
-                                    <b-col lg="1" sm="1">
-                                        <span
-                                            :title="item.active&&item.endorsed?'':item.endorsed?'invalid endorsement':'offline'"
-                                            v-b-tooltip.hover>
-                                            <b-icon-circle-fill
-                                                :variant="item.active&&item.endorsed?'success':'danger'">
-                                            </b-icon-circle-fill>
-                                        </span>
-                                    </b-col>
-                                    <b-col lg="1" sm="2">
-                                        <b-link @click="revokeMaster(item.master)">DEL</b-link>
-                                    </b-col>
-                                </template>
-                            </list-item>
-                        </b-list-group>
-                    </b-card>
-                </b-overlay>
-            </b-container>
-        </b-overlay>
-       <tx-modal v-model="showModal" :txid="txReq.txid" :error="txReq.error"></tx-modal>
+                        <b-list-group-item class="title-with-bg py-3 px-4">
+                            <div>
+                                <h4 class="my-auto">Authority</h4>
+                            </div>
+                        </b-list-group-item>
+                        <list-item v-for="(item, index) in masternodes" :key="index">
+                            <template #content>
+                                <b-col lg="2"><strong>#{{index}}</strong></b-col>
+                                <b-col lg="7"><a class="text-monospace text-truncate"
+                                        :href="explorer.account(item.master)" :title="'identity: '+item.identity"
+                                        v-b-tooltip.hover target="_blank">{{item.master}}</a>
+                                </b-col>
+                                <b-col lg="1" sm="1">
+                                    <span
+                                        :title="item.active&&item.endorsed?'':item.endorsed?'invalid endorsement':'offline'"
+                                        v-b-tooltip.hover>
+                                        <b-icon-circle-fill :variant="item.active&&item.endorsed?'success':'danger'">
+                                        </b-icon-circle-fill>
+                                    </span>
+                                </b-col>
+                                <b-col lg="1" sm="2">
+                                    <b-link @click="revokeMaster(item.master)">DEL</b-link>
+                                </b-col>
+                            </template>
+                        </list-item>
+                    </b-list-group>
+                </b-card>
+            </b-overlay>
+        </b-container>
+        <tx-modal v-model="showModal" :txid="txReq.txid" :error="txReq.error"></tx-modal>
     </b-container>
 </template>
   
@@ -76,10 +72,8 @@
 import { Connex } from '@vechain/connex'
 import { inject, ref } from 'vue'
 import { abi } from 'thor-devkit'
-import { AuthUtils, Params } from '../contracts'
-import { Executor, getApprovers } from '../contracts/executor'
-import { Authority } from '../contracts/authority'
-import { explorer } from '../utils'
+import { AuthUtils, Params, Executor, getApprovers, Authority } from '../contracts'
+import { explorer } from '../config'
 
 const connex = inject<Connex>('$connex')!
 const loading = ref(false)
@@ -145,7 +139,7 @@ const loadData = async () => {
             }
         })(),
         (async () => {
-            approvers.value = await getApprovers(connex)            
+            approvers.value = await getApprovers(connex)
         })(),
         (async () => {
             masternodes.value = await AuthUtils.ListAll(connex.thor)
@@ -165,7 +159,7 @@ const revokeMaster = async (addr: string) => {
     txReq.value.error = ''
     txReq.value.txid = ''
     if (!showModal.value) {
-        showModal.value = true    
+        showModal.value = true
     }
     try {
         const action = connex.thor.account(Authority.address).method(Authority.methods.revoke).asClause(addr)
@@ -176,11 +170,11 @@ const revokeMaster = async (addr: string) => {
             .transact(action.to, action.data)
             .request()
         if (theSession === session) {
-            txReq.value.txid=resp.txid    
+            txReq.value.txid = resp.txid
         }
     } catch (e) {
-        if (theSession === session) { 
-            txReq.value.error=(e as Error).message
+        if (theSession === session) {
+            txReq.value.error = (e as Error).message
         }
     }
 }

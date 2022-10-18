@@ -1,5 +1,5 @@
 import { abi, keccak256 } from 'thor-devkit'
-import {Buffer} from 'buffer'
+import { Buffer } from 'buffer'
 import * as bytecode from './bytecode.json'
 
 // Set EVM version to 'byzantium' in complier for using in Pre-ETH_CONST blocks.
@@ -25,14 +25,14 @@ export interface MasterNode {
 
 export const ListAll = async (thor: Connex.Thor) => {
     const ret = await thor.explain([
-            {
-                to: null,
-                value: '0',
-                data: bytecode.listAll
-            }, {
-                to: contractAddr,
-                value: '0',
-                data: listAll.encode()
+        {
+            to: null,
+            value: '0',
+            data: bytecode.listAll
+        }, {
+            to: contractAddr,
+            value: '0',
+            data: listAll.encode()
         }
     ]).execute()
 

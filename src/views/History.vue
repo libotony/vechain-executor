@@ -6,7 +6,7 @@
                     <div class="d-flex justify-content-between">
                         <h4 class="my-auto">History</h4>
                         <span>
-                            <b-button variant="primary" @click="refresh" :disabled="loading">Refresh</b-button>
+                            <b-button variant="primary" pill @click="loadData"><b-icon-arrow-clockwise></b-icon-arrow-clockwise></b-button>
                         </span>
                     </div>
                 </template>
@@ -44,7 +44,7 @@
                             </b-col>
                             <b-col lg="8" class="d-flex align-items-center">
                                 <span class="text-monospace text-truncate">
-                                    {{proposal.desc}}
+                                    <b-link :to="{name: 'proposal', params: {id: proposal.id}}">{{proposal.desc}}</b-link>
                                 </span>
                             </b-col>
                             <b-col lg="1" class="d-flex align-items-center">
@@ -72,8 +72,7 @@
 <script setup lang="ts">
 import { abi } from 'thor-devkit'
 import { inject, ref } from 'vue'
-import { descMethod } from '../contracts'
-import { Executor } from '../contracts/executor'
+import { Executor, descMethod } from '../contracts'
 
 const connex = inject<Connex>('$connex')!
 let head = connex.thor.status.head.number
@@ -160,7 +159,7 @@ const loadData = async () => {
             const decoded = executor.proposals.decode(pps.data)
             proposals.value.push({
                 id: proposed[index],
-                time: decoded['timeProposed'],
+                time: parseInt(decoded['timeProposed']),
                 desc: descMethod(decoded['target'], decoded['data']),
                 executed: decoded['executed'] as boolean,
             })

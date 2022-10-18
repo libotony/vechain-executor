@@ -23,7 +23,8 @@ export const Executor = {
         revoked: '0x' + Buffer.from('revoked').toString('hex').padEnd(64, '0'),
         added: '0x' + Buffer.from('added').toString('hex').padEnd(64, '0'),
         proposed: '0x' + Buffer.from('proposed').toString('hex').padEnd(64, '0'),
-        executed: '0x' + Buffer.from('executed').toString('hex').padEnd(64, '0')
+        executed: '0x' + Buffer.from('executed').toString('hex').padEnd(64, '0'),
+        approved: '0x' + Buffer.from('approved').toString('hex').padEnd(64, '0')
     }
 }
 
