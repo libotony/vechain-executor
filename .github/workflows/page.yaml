@@ -28,11 +28,9 @@ jobs:
         run: npm ci
   
       - name: Build Website
-        run: npx vite build --base=/vechain-executor/
+        run: cp entry/index.prod.html index.html && npx tsc && npx vite build --base=/vechain-executor/
 
       - name: Deploy
-        if: ${{ github.repository_owner != 'vechain' }}
-
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
