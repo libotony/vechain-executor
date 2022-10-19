@@ -41,28 +41,32 @@
                                     </b-col>
                                 </template>
                             </list-item>
-                            <b-list-group-item class="py-1" v-if="input.params.length">
-                                <b-row class="justify-content-center">
-                                    <b-card class="w-100">
-                                        <template #header>
-                                            <strong>{{input.name}}</strong>
-                                        </template>
-                                        <b-card-body class="p-0">
-                                            <b-table small :items="input.params" responsive
-                                                tbody-tr-class="text-monospace text-smaller" class="mb-0">
-                                            </b-table>
-                                        </b-card-body>
-                                    </b-card>
+                            <b-list-group-item>
+                                <b-row class="justify-content-start ">
+                                    <b-col class="text-monospace text-truncate">
+                                        <strong>{{input.name}}</strong>
+                                    </b-col>
+                                </b-row>
+                                <b-row class="my-2" v-if="input.params.length">
+                                    <b-col>
+                                        <b-table-simple small responsive class="mb-0">
+                                            <b-tbody>
+                                                <b-tr v-for="(param, index) in input.params" :key="index">
+                                                    <b-td class="text-monospace text-smaller">
+                                                        {{param.name}}
+                                                    </b-td>
+                                                    <b-td class="text-monospace text-smaller">
+                                                        {{param.type}}
+                                                    </b-td>
+                                                    <b-td class="text-monospace text-smaller">
+                                                        {{param.value}}
+                                                    </b-td>
+                                                </b-tr>
+                                            </b-tbody>
+                                        </b-table-simple>
+                                    </b-col>
                                 </b-row>
                             </b-list-group-item>
-                            <list-item v-else class="py-1">
-                                <template #content>
-                                    <b-col cols="2"><strong>Content:</strong></b-col>
-                                    <b-col cols="10" class="text-monospace text-truncate">
-                                        <p>{{input.name}}</p>
-                                    </b-col>
-                                </template>
-                            </list-item>
                         </template>
                     </b-list-group>
                 </b-card>

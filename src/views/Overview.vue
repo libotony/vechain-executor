@@ -36,7 +36,7 @@
 
                         <list-item v-for="(item, index) in approvers" :key="'c'+index">
                             <template #content>
-                                <b-col lg="2"><strong>#{{index}}</strong></b-col>
+                                <b-col lg="2"><strong>#{{index+1}}</strong></b-col>
                                 <b-col lg="7">
                                     <a :href="explorer.account(item.address)" v-b-tooltip.hover
                                         :title="'identity '+item.identity" class="text-monospace text-truncate"
@@ -47,12 +47,12 @@
 
                         <b-list-group-item class="title-with-bg py-3 px-4">
                             <div>
-                                <h4 class="my-auto">Authority</h4>
+                                <h4 class="my-auto d-inline">Authority</h4><sup class="d-inline text-secondary">{{activeNodes!==-1?' '+activeNodes:''}}</sup>
                             </div>
                         </b-list-group-item>
                         <list-item v-for="(item, index) in masternodes" :key="index">
                             <template #content>
-                                <b-col lg="2"><strong>#{{index}}</strong></b-col>
+                                <b-col lg="2"><strong>#{{index+1}}</strong></b-col>
                                 <b-col lg="7"><a class="text-monospace text-truncate"
                                         :href="explorer.account(item.master)" :title="'identity: '+item.identity"
                                         v-b-tooltip.hover target="_blank">{{item.master}}</a>
@@ -80,7 +80,7 @@
   
 <script setup lang="ts">
 import { Connex } from '@vechain/connex'
-import { inject, ref } from 'vue'
+import { computed, inject, ref } from 'vue'
 import { abi } from 'thor-devkit'
 import { AuthUtils, Params, Executor, getApprovers, Authority } from '../contracts'
 import { explorer } from '../config'
@@ -158,6 +158,20 @@ const loadData = async () => {
 
     loading.value = false
 }
+
+const activeNodes = computed(() => {
+    if (masternodes.value.length) {
+        let cnt = 0
+        for (let n of masternodes.value) {
+            if (n.active && n.endorsed) {
+                cnt++
+            }
+        }
+        return cnt
+    } else {
+        return -1
+    }
+})
 
 const showModal = ref(false)
 const txReq = ref<{ error: string, txid: string }>({ error: '', txid: '' })
