@@ -10,7 +10,6 @@ declare module '@vue/runtime-core' {
     App: typeof import('./src/App.vue')['default']
     BButton: typeof import('bootstrap-vue')['BButton']
     BCard: typeof import('bootstrap-vue')['BCard']
-    BCardBody: typeof import('bootstrap-vue')['BCardBody']
     BCol: typeof import('bootstrap-vue')['BCol']
     BCollapse: typeof import('bootstrap-vue')['BCollapse']
     BContainer: typeof import('bootstrap-vue')['BContainer']

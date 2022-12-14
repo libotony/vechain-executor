@@ -16,10 +16,5 @@ export default {
             ]
         }),
         nodePolyfills()
-    ],
-    build: {
-        commonjsOptions: {
-            transformMixedEsModules: true,
-        },
-    }
+    ]
 }
