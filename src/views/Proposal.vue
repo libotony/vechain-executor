@@ -35,7 +35,7 @@
                             </list-item>
                             <list-item v-if="approvers.length">
                                 <template #content>
-                                    <b-col cols="2"><strong>Proposers:</strong></b-col>
+                                    <b-col cols="2"><strong>Approvers:</strong></b-col>
                                     <b-col cols="10" class="text-monospace text-truncate">
                                         <p v-for="appr in approvers">{{appr}}</p>
                                     </b-col>
