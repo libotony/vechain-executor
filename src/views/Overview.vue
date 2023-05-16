@@ -37,10 +37,13 @@
                         <list-item v-for="(item, index) in approvers" :key="'c'+index">
                             <template #content>
                                 <b-col lg="2"><strong>#{{index+1}}</strong></b-col>
-                                <b-col lg="7">
+                                <b-col lg="7" class="text-truncate">
                                     <a :href="explorer.account(item.address)" v-b-tooltip.hover
                                         :title="'identity '+item.identity" class="text-monospace text-truncate"
                                         target="_blank">{{item.address}}</a>
+                                </b-col>
+                                <b-col lg="1" sm="2">
+                                    <b-link @click="revokeApprover(item.address)">DEL</b-link>
                                 </b-col>
                             </template>
                         </list-item>
@@ -53,7 +56,7 @@
                         <list-item v-for="(item, index) in masternodes" :key="index">
                             <template #content>
                                 <b-col lg="2"><strong>#{{index+1}}</strong></b-col>
-                                <b-col lg="7"><a class="text-monospace text-truncate"
+                                <b-col lg="7" class="text-truncate"><a class="text-monospace"
                                         :href="explorer.account(item.master)" :title="'identity: '+item.identity"
                                         v-b-tooltip.hover target="_blank">{{item.master}}</a>
                                 </b-col>
@@ -187,6 +190,32 @@ const revokeMaster = async (addr: string) => {
     }
     try {
         const action = connex.thor.account(Authority.address).method(Authority.methods.revoke).asClause(addr)
+        const resp = await connex
+            .thor
+            .account(Executor.address)
+            .method(Executor.methods.propose)
+            .transact(action.to, action.data)
+            .request()
+        if (theSession === session) {
+            txReq.value.txid = resp.txid
+        }
+    } catch (e) {
+        if (theSession === session) {
+            txReq.value.error = (e as Error).message
+        }
+    }
+}
+const revokeApprover = async (addr: string) => {
+    const theSession = session = {}
+
+    txReq.value.error = ''
+    txReq.value.txid = ''
+    if (!showModal.value) {
+        showModal.value = true
+    }
+    try {
+        const action = connex.thor.account(Executor.address).method(Executor.methods.revokeApprover).asClause(addr)
+        console.log(action)
         const resp = await connex
             .thor
             .account(Executor.address)
