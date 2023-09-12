@@ -28,7 +28,7 @@ jobs:
         run: npm ci
   
       - name: Build Website
-        run: cp entry/index.prod.html index.html && npx tsc && npx vite build --base=/vechain-executor/
+        run: npx tsc && npx vite build --base=/vechain-executor/
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3

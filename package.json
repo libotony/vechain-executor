@@ -4,8 +4,8 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "cp entry/index.html index.html && vite",
-    "build": "cp entry/index.prod.html index.html && tsc && vite build",
+    "dev": "vite",
+    "build": "tsc && vite build",
     "preview": "vite preview"
   },
   "devDependencies": {
@@ -21,7 +21,7 @@
     "@vechain/connex": "^2.0.11",
     "bootstrap": "^4.6.2",
     "bootstrap-vue": "^2.22.0",
-    "thor-devkit": "^2.0.6",
+    "thor-devkit": "^2.0.9",
     "vue": "^2.7.10",
     "vue-router": "^3.6.5"
   }
