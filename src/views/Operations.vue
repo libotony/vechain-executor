@@ -97,7 +97,8 @@ import { abi, blake2b256 } from 'thor-devkit'
 import { computed, inject, ref } from 'vue'
 import { Executor, descMethod, Authority } from '../contracts'
 
-const connex = inject<Connex>('$connex')!
+const thor = inject<Connex.Thor>('$thor')!
+const vendor = inject<Connex.Vendor>('$vendor')!
 
 const showModal = ref(false)
 const txReq = ref<{ error: string, txid: string }>({ error: '', txid: '' })
@@ -148,12 +149,11 @@ const isValidEndorsor = computed(() => {
 })
 
 const addMaster = async () => {
-    const action = connex.thor.account(Authority.address).method(Authority.methods.add).asClause(master.value, endorsor.value, hashed.value)
+    const action = thor.account(Authority.address).method(Authority.methods.add).asClause(master.value, endorsor.value, hashed.value)
     await sendTx(
-        connex.thor
-            .account(Executor.address)
-            .method(Executor.methods.propose)
-            .transact(action.to, action.data)
+        vendor.sign('tx', [
+            thor.account(Executor.address).method(Executor.methods.propose).asClause(action.to, action.data)
+        ])
     )
 }
 
@@ -161,7 +161,7 @@ const pendingProposals = ref<{ id: string; time: number; desc: string; selected:
 const loading = ref(true)
 
 const executor = {
-    Proposal: connex.thor.account(Executor.address).event(Executor.events.Proposal).filter([]),
+    Proposal: thor.account(Executor.address).event(Executor.events.Proposal).filter([]),
     proposals: new abi.Function(Executor.methods.proposals as abi.Function.Definition)
 }
 
@@ -186,7 +186,7 @@ const runExecutor = async (execute: boolean) => {
     }
 
     if (ids.length) {
-        const method = connex.thor.account(Executor.address).method(execute ? Executor.methods.execute : Executor.methods.approve)
+        const method = thor.account(Executor.address).method(execute ? Executor.methods.execute : Executor.methods.approve)
         const msg: Connex.Vendor.TxMessage = []
 
         for (const id of ids) {
@@ -197,7 +197,7 @@ const runExecutor = async (execute: boolean) => {
         }
 
         await sendTx(
-            connex.vendor.sign('tx', msg)
+            vendor.sign('tx', msg)
         )
     }
 }
@@ -274,7 +274,7 @@ const loadData = async () => {
                 data: executor.proposals.encode(proposed[j])
             })
         }
-        const ret = await connex.thor.explain(clauses).cache([Executor.address]).execute()
+        const ret = await thor.explain(clauses).cache([Executor.address]).execute()
 
         for (const [index, pps] of ret.entries()) {
             const decoded = executor.proposals.decode(pps.data)

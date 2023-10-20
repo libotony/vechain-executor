@@ -82,13 +82,13 @@
 </template>
   
 <script setup lang="ts">
-import { Connex } from '@vechain/connex'
 import { computed, inject, ref } from 'vue'
 import { abi } from 'thor-devkit'
 import { AuthUtils, Params, Executor, getApprovers, Authority } from '../contracts'
 import { explorer } from '../config'
 
-const connex = inject<Connex>('$connex')!
+const thor = inject<Connex.Thor>('$thor')!
+const vendor = inject<Connex.Vendor>('$vendor')!
 const loading = ref(false)
 
 const paramsData = ref({
@@ -110,7 +110,7 @@ const loadData = async () => {
 
     await Promise.all([
         (async () => {
-            const ret = await connex.thor.explain([
+            const ret = await thor.explain([
                 {
                     to: Params.address,
                     value: 0,
@@ -152,10 +152,10 @@ const loadData = async () => {
             }
         })(),
         (async () => {
-            approvers.value = await getApprovers(connex)
+            approvers.value = await getApprovers(thor)
         })(),
         (async () => {
-            masternodes.value = await AuthUtils.ListAll(connex.thor)
+            masternodes.value = await AuthUtils.ListAll(thor)
         })()
     ])
 
@@ -189,13 +189,10 @@ const revokeMaster = async (addr: string) => {
         showModal.value = true
     }
     try {
-        const action = connex.thor.account(Authority.address).method(Authority.methods.revoke).asClause(addr)
-        const resp = await connex
-            .thor
-            .account(Executor.address)
-            .method(Executor.methods.propose)
-            .transact(action.to, action.data)
-            .request()
+        const action = thor.account(Authority.address).method(Authority.methods.revoke).asClause(addr)
+        const resp = await vendor.sign('tx', [
+            thor.account(Executor.address).method(Executor.methods.propose).asClause(action.to, action.data)
+        ]).request()
         if (theSession === session) {
             txReq.value.txid = resp.txid
         }
@@ -214,14 +211,10 @@ const revokeApprover = async (addr: string) => {
         showModal.value = true
     }
     try {
-        const action = connex.thor.account(Executor.address).method(Executor.methods.revokeApprover).asClause(addr)
-        console.log(action)
-        const resp = await connex
-            .thor
-            .account(Executor.address)
-            .method(Executor.methods.propose)
-            .transact(action.to, action.data)
-            .request()
+        const action = thor.account(Executor.address).method(Executor.methods.revokeApprover).asClause(addr)
+        const resp = await vendor.sign('tx', [
+            thor.account(Executor.address).method(Executor.methods.propose).asClause(action.to, action.data)
+        ]).request()
         if (theSession === session) {
             txReq.value.txid = resp.txid
         }

@@ -77,11 +77,11 @@ import { abi } from 'thor-devkit'
 import { inject, ref } from 'vue'
 import { Executor, descMethod } from '../contracts'
 
-const connex = inject<Connex>('$connex')!
-let head = connex.thor.status.head.number
+const thor = inject<Connex.Thor>('$thor')!
+let head = thor.status.head.number
 
 const executor = {
-    Proposal: connex.thor.account(Executor.address).event(Executor.events.Proposal).filter([]).cache([Executor.address]),
+    Proposal: thor.account(Executor.address).event(Executor.events.Proposal).filter([]).cache([Executor.address]),
     proposals: new abi.Function(Executor.methods.proposals as abi.Function.Definition)
 }
 
@@ -100,7 +100,7 @@ const isPending = (timeProposed: number) => {
 }
 
 const refresh = async () => {
-    head = connex.thor.status.head.number
+    head = thor.status.head.number
     proposals.value = []
     hasMore.value = true
     pos = 0
@@ -117,11 +117,11 @@ const loadData = async () => {
     let stop = false
 
     if (head === 0) {
-        if (connex.thor.status.head.number) {
-            head = connex.thor.status.head.number
+        if (thor.status.head.number) {
+            head = thor.status.head.number
         } else {
-            await connex.thor.ticker().next()
-            head = connex.thor.status.head.number
+            await thor.ticker().next()
+            head = thor.status.head.number
         }
     }
 
@@ -162,7 +162,7 @@ const loadData = async () => {
                 data: executor.proposals.encode(proposed[i])
             })
         }
-        const ret = await connex.thor.explain(clauses).cache([Executor.address]).execute()
+        const ret = await thor.explain(clauses).cache([Executor.address]).execute()
 
         for (const [index, pps] of ret.entries()) {
             const decoded = executor.proposals.decode(pps.data)

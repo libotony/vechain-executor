@@ -28,7 +28,7 @@ export const Executor = {
     }
 }
 
-export const getApprovers = async (connex: Connex) => {
+export const getApprovers = async (thor: Connex.Thor) => {
     const coderApprovers = new abi.Function(Executor.methods.approvers as abi.Function.Definition)
     const approvers: {
         address: string;
@@ -40,8 +40,7 @@ export const getApprovers = async (connex: Connex) => {
     const revoked = new Set<string>()
     const addrs: string[] = []
     for (; ;) {
-        const filtered = await connex
-            .thor
+        const filtered = await thor
             .account(Executor.address)
             .event(Executor.events.Approvers)
             .filter([])
@@ -69,7 +68,7 @@ export const getApprovers = async (connex: Connex) => {
             data: coderApprovers.encode(address)
         })
     }
-    const ret = await connex.thor.explain(clauses).cache([Executor.address]).execute()
+    const ret = await thor.explain(clauses).cache([Executor.address]).execute()
     for (const [index, address] of inPower.entries()) {
         const decoded = coderApprovers.decode(ret[index].data)
         approvers.push({

@@ -81,7 +81,7 @@ import { inject, ref } from 'vue';
 import { useRoute } from 'vue-router/composables'
 import { Authority, Executor, Params, abbr } from '../contracts';
 
-const connex = inject<Connex>('$connex')!
+const thor = inject<Connex.Thor>('$thor')!
 const route = useRoute()
 const proposal = ref<{
     ID: string;
@@ -124,15 +124,13 @@ const loadData = async () => {
     const proposalID = route.params.id
 
     if (/^0x[0-9a-fA-f]{40}/i.test(proposalID)) {
-        const ret = await connex
-            .thor
+        const ret = await thor
             .account(Executor.address)
             .method(Executor.methods.proposals)
             .call(proposalID)
 
         if (parseInt(ret.decoded['timeProposed'])) {
-            const evs = await connex
-                .thor
+            const evs = await thor
                 .account(Executor.address)
                 .event(Executor.events.Proposal)
                 .filter([{ proposalID }])
