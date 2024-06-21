@@ -76,6 +76,9 @@
                                     <b-button variant="info" @click="selectAll">SELECT ALL</b-button>
                                 </span>
                                 <span class="pr-2">
+                                    <b-button variant="info":disabled="!enableApprove"  @click="dismiss">DISMISS</b-button>
+                                </span>
+                                <span class="pr-2">
                                     <b-button variant="primary" :disabled="!enableApprove" @click="runExecutor(false)">Approve</b-button>
                                 </span>
                                 <span class="pr-2">
@@ -168,6 +171,12 @@ const executor = {
 const selectAll = () => {
     for (const p of pendingProposals.value) {
         p.selected = true
+    }
+}
+
+const dismiss = () => {
+    for (const p of pendingProposals.value) {
+        p.selected = false
     }
 }
 
