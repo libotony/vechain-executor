@@ -8,7 +8,7 @@ import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
 
 const thor = new Connex.Thor({
-    node: 'https://sync-mainnet.veblocks.net',
+    node: 'https://mainnet.vechain.org',
     network: 'main'
 })
 const vendor = new Connex.Vendor('main', 'sync2')
